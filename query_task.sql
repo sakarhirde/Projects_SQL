@@ -14,12 +14,20 @@ select
     end) as created_by,
 
     (case
-        when ati.REGION   is not null then ati.REGION
+        when aca.ADDRESS_BRANCh  is not null then aca.ADDRESS_BRANCH
         else 'No information available'
-    end) as region,
+    end) as client_region,
+    (case
+        when aba.AREA is not null then aba.AREA
+        else 'No information available'
+    end) as brand_region,
+    (case
+        when asa.AREA is not null then asa.AREA
+        else 'No information available'
+    end) as store_region,
 
      (case
-        when ata.ASSIGNED_ENGG_ID  is not null then ata.ASSIGNED_ENGG_ID
+        when concat(aei.FIRST_NAME, '  ' , aei.last_name)  is not null then concat(aei.FIRST_NAME,' ', aei.last_name)
         else 'No information available'
      end) as assigned_to,
 
@@ -60,6 +68,7 @@ from adm_ticket_info ati
      left join adm_client_regdetails acr on acr.ID = abr.COMPANY_ID /*checked*/
      left join adm_client_info aci on aci.ADMIN_ID = acr.ID
 
+
      left join adm_ticket_status ats on ats.CAT_ID = ati.STATUS /*checked*/
      left join adm_ticket_status ats2 on ats2.CAT_ID = ati.SUB_STATUS
 
@@ -67,5 +76,10 @@ from adm_ticket_info ati
      left join (select * from adm_ticket_assigned where TEMP_ID in (
                 select min(adm_ticket_assigned.TEMP_ID) from adm_ticket_assigned group by adm_ticket_assigned.TICKET_ID)) ata on ata.TICKET_ID = ati.TEMP_ID
 
+     left join adm_employee_info aei on aei.ID = ata.ASSIGNED_ENGG_ID
      left join (select * from adm_ticket_followups where F_ID in (
-                select max(F_ID) from adm_ticket_followups group by TICKET_ID)) atf on atf.TICKET_ID = ati.TEMP_ID;
+                select max(F_ID) from adm_ticket_followups group by TICKET_ID)) atf on atf.TICKET_ID = ati.TEMP_ID
+
+     left join adm_client_address aca on aca.ID = aci.ADMIN_ID
+     left join adm_brand_address aba on aba.ID = abi.ADMIN_ID
+     left join adm_store_address asa on asa.ID = asi.admin_id;
