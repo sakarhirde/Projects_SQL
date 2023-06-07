@@ -64,4 +64,5 @@ from adm_ticket_info ati
                 select min(adm_ticket_assigned.TEMP_ID) from adm_ticket_assigned group by adm_ticket_assigned.TICKET_ID)) ata on ata.TICKET_ID = ati.TEMP_ID
 
      left join (select * from adm_ticket_followups where F_ID in (
-                select max(F_ID) from adm_ticket_followups group by TICKET_ID)) atf on atf.TICKET_ID = ati.TEMP_ID;
+                select max(F_ID) from adm_ticket_followups group by TICKET_ID)) atf on atf.TICKET_ID = ati.TEMP_ID
+        where  ats.cat_name not in ('Closed');
