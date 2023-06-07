@@ -29,6 +29,10 @@ select
      end) as assigned_type,
 
     ats.cat_name as ticket_status,       /* problem increase 5.7k to 7.8k*/
+    (case
+        when ats2.CAT_NAME is not null then ats2.CAT_NAME
+        else 'No sub status assigned'
+    end) as sub_status,
     stt.type_name as ticket_type,        /* problem increase 5.7k to 7.8k*/
     atf.DATE  as last_follow_up_date,
 
@@ -57,12 +61,11 @@ from adm_ticket_info ati
      left join adm_client_info aci on aci.ADMIN_ID = acr.ID
 
      left join adm_ticket_status ats on ats.CAT_ID = ati.STATUS /*checked*/
-
+     left join adm_ticket_status ats2 on ats2.CAT_ID = ati.SUB_STATUS
 
      left join smr_ticket_type stt on stt.TEMP_ID = ati.TICKET_TYPE
      left join (select * from adm_ticket_assigned where TEMP_ID in (
                 select min(adm_ticket_assigned.TEMP_ID) from adm_ticket_assigned group by adm_ticket_assigned.TICKET_ID)) ata on ata.TICKET_ID = ati.TEMP_ID
 
      left join (select * from adm_ticket_followups where F_ID in (
-                select max(F_ID) from adm_ticket_followups group by TICKET_ID)) atf on atf.TICKET_ID = ati.TEMP_ID
-        where  ats.cat_name not in ('Closed');
+                select max(F_ID) from adm_ticket_followups group by TICKET_ID)) atf on atf.TICKET_ID = ati.TEMP_ID;
