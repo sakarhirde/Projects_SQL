@@ -13,18 +13,19 @@ select
         else 'No information available'
     end) as created_by,
 
-    (case
-        when aca.ADDRESS_BRANCh  is not null then aca.ADDRESS_BRANCH
-        else 'No information available'
-    end) as client_region,
-    (case
-        when aba.AREA is not null then aba.AREA
-        else 'No information available'
-    end) as brand_region,
-    (case
+     (case
+        when asa.area is null then
+            (case
+            when aba.AREA is null then
+                (case
+                 when aca.AREA is null then 'N/A'
+                 when aca.AREA is not null then aca.AREA
+                 end)
+            when aba.AREA is not null then aba.AREA
+            end)
         when asa.AREA is not null then asa.AREA
-        else 'No information available'
-    end) as store_region,
+     end) as region,
+
 
      (case
         when concat(aei.FIRST_NAME, '  ' , aei.last_name)  is not null then concat(aei.FIRST_NAME,' ', aei.last_name)
