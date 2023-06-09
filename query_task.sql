@@ -1,7 +1,7 @@
 select
     ati.ticket_id as ticket_id,
-    ati.TEMP_ID as unique_t_id,
-    ati.STORE_ID as ticket_store_id,
+    ati.ticket_id as unique_ticket_id,
+
     ati.cust_ticket_number as cust_tick_number,
     asi.company_name as store_name,
     asr.store_id as store_id,
@@ -49,18 +49,18 @@ select
         when atf.details is not null then atf.details
         else 'No followup message'
     end) as last_follow_up_message,
-    timestampdiff(month , ati.ENTRYTIME, date_add(now(), interval 330 minute)) as ticket_age,
-    timestampdiff(month , atf.date, date_add(now(), interval 330 minute)) as followup_age,
+    timestampdiff(day , ati.ENTRYTIME, date_add(now(), interval 330 minute)) as ticket_age,
+    timestampdiff(day , atf.date, date_add(now(), interval 330 minute)) as followup_age,
     ati.call_title as call_title,
     (case
-        when timestampdiff(month , ati.ENTRYTIME, date_add(now(), interval 330 minute)) between 0 and 3 then '0-3'
-        when timestampdiff(month , ati.ENTRYTIME, date_add(now(), interval 330 minute)) between 3 and 7 then '3-7'
-        when timestampdiff(month , ati.ENTRYTIME, date_add(now(), interval 330 minute)) >7 then '7+'
+        when timestampdiff(day , ati.ENTRYTIME, date_add(now(), interval 330 minute)) between 0 and 3 then '0-3'
+        when timestampdiff(day , ati.ENTRYTIME, date_add(now(), interval 330 minute)) between 3 and 7 then '3-7'
+        when timestampdiff(day , ati.ENTRYTIME, date_add(now(), interval 330 minute)) >7 then '7+'
         else 'No information'
     end) as ticket_age_group
 
 from adm_ticket_info ati
-     left join adm_store_regdetails asr on ati.temp_ID = asr.ID
+     left join adm_store_regdetails asr on asr.id = ati.STORE_ID
      left join adm_store_info asi on asi.ADMIN_ID = asr.ID
 
      left join adm_brand_regdetails abr on abr.ID = asr.BRAND_ID /*65 vs 67*/
@@ -75,7 +75,7 @@ from adm_ticket_info ati
 
      left join smr_ticket_type stt on stt.TEMP_ID = ati.TICKET_TYPE
      left join (select * from adm_ticket_assigned where TEMP_ID in (
-                select min(adm_ticket_assigned.TEMP_ID) from adm_ticket_assigned group by adm_ticket_assigned.TICKET_ID)) ata on ata.TICKET_ID = ati.TEMP_ID
+                select max(adm_ticket_assigned.TEMP_ID) from adm_ticket_assigned group by adm_ticket_assigned.TICKET_ID)) ata on ata.TICKET_ID = ati.TEMP_ID
 
      left join adm_employee_info aei on aei.ID = ata.ASSIGNED_ENGG_ID
      left join (select * from adm_ticket_followups where F_ID in (
